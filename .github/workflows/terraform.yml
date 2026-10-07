@@ -6,9 +6,20 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
-  terraform:
+  validate:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Raíz del proyecto y stack de bootstrap del backend remoto
+        directory: [".", "bootstrap"]
+    defaults:
+      run:
+        working-directory: ${{ matrix.directory }}
 
     steps:
       - name: Checkout repository
@@ -19,11 +30,11 @@ jobs:
         with:
           terraform_version: 1.13.4
 
-      - name: Terraform Init
-        run: terraform init -backend=false
-
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
+
+      - name: Terraform Init (sin backend)
+        run: terraform init -backend=false
 
       - name: Terraform Validate
         run: terraform validate

@@ -23,3 +23,14 @@ variable "environment" {
     error_message = "environment debe ser dev, stage o prod."
   }
 }
+
+variable "kinesis_shard_count" {
+  description = "Cantidad de shards del Kinesis Data Stream en modo PROVISIONED."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.kinesis_shard_count >= 1
+    error_message = "kinesis_shard_count debe ser al menos 1."
+  }
+}

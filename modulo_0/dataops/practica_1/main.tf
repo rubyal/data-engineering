@@ -1,9 +1,19 @@
 locals {
   # Patrón: <proyecto>-<ambiente>-<servicio>-<recurso>
-  name_prefix = "ruby"
+  # Única fuente de verdad del prefijo: los módulos lo reciben como input.
+  name_prefix = "${var.project_name}-${var.environment}"
 }
 
-# Los recursos AWS se agregarán de forma incremental.
-# Futuro: módulos para Kinesis Data Streams y Amazon Managed Service
-# for Apache Flink, con IAM de mínimo privilegio.
-# Ejemplo futuro: name = "${local.name_prefix}-kinesis-events"
+module "kinesis" {
+  source = "./modules/kinesis"
+
+  name_prefix = local.name_prefix
+  shard_count = var.kinesis_shard_count
+}
+
+module "flink" {
+  source = "./modules/flink"
+
+  name_prefix        = local.name_prefix
+  kinesis_stream_arn = module.kinesis.stream_arn
+}
